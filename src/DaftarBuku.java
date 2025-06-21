@@ -11,7 +11,7 @@ public class DaftarBuku extends JFrame implements ActionListener {
 
     public DaftarBuku() {
         setTitle("Daftar Buku");
-        setSize(800, 400); // Ukuran diperbesar untuk muat kolom kategori
+        setSize(800, 400); 
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -40,7 +40,7 @@ public class DaftarBuku extends JFrame implements ActionListener {
     }
 
     private void tampilkanData() {
-        model.setRowCount(0); // Clear table
+        model.setRowCount(0); 
         try (Connection conn = DBConnection.getConnection()) {
             String sql = "SELECT b.id_buku, b.judul, b.pengarang, k.nama_kategori, b.stok, b.harga " +
                          "FROM buku b LEFT JOIN kategori k ON b.id_kategori = k.id_kategori";
@@ -50,7 +50,7 @@ public class DaftarBuku extends JFrame implements ActionListener {
                     rs.getString("id_buku"),
                     rs.getString("judul"),
                     rs.getString("pengarang"),
-                    rs.getString("nama_kategori"), // bisa null kalau belum ada kategori
+                    rs.getString("nama_kategori"), 
                     rs.getInt("stok"),
                     rs.getInt("harga")
                 });
