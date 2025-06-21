@@ -50,7 +50,7 @@ public class FormTransaksi extends JFrame implements ActionListener {
                     return;
                 }
 
-                // Cek buku
+                
                 String cekBuku = "SELECT stok, harga FROM buku WHERE id_buku = ?";
                 PreparedStatement psCek = conn.prepareStatement(cekBuku);
                 psCek.setString(1, idBuku);
@@ -71,7 +71,7 @@ public class FormTransaksi extends JFrame implements ActionListener {
 
                 int subtotal = jumlah * hargaSatuan;
 
-                // Simpan atau update pembeli
+                
                 String sqlPembeli = "INSERT INTO pembeli (id_pembeli, nama, alamat) VALUES (?, ?, ?) " +
                                     "ON DUPLICATE KEY UPDATE nama = ?, alamat = ?";
                 PreparedStatement psPembeli = conn.prepareStatement(sqlPembeli);
@@ -82,7 +82,7 @@ public class FormTransaksi extends JFrame implements ActionListener {
                 psPembeli.setString(5, alamat);
                 psPembeli.executeUpdate();
 
-                // Simpan transaksi
+                
                 String sqlTransaksi = "INSERT INTO transaksi (id_pembeli, tanggal) VALUES (?, ?)";
                 PreparedStatement psTransaksi = conn.prepareStatement(sqlTransaksi, Statement.RETURN_GENERATED_KEYS);
                 psTransaksi.setString(1, idPembeli);
@@ -95,7 +95,7 @@ public class FormTransaksi extends JFrame implements ActionListener {
                     idTransaksi = rsTransaksi.getInt(1);
                 }
 
-                // Simpan detail transaksi
+                
                 String sqlDetail = "INSERT INTO detail_transaksi (id_transaksi, id_buku, jumlah, harga_satuan, subtotal) " +
                                    "VALUES (?, ?, ?, ?, ?)";
                 PreparedStatement psDetail = conn.prepareStatement(sqlDetail);
@@ -106,14 +106,14 @@ public class FormTransaksi extends JFrame implements ActionListener {
                 psDetail.setInt(5, subtotal);
                 psDetail.executeUpdate();
 
-                // Update stok
+                
                 String updateStok = "UPDATE buku SET stok = stok - ? WHERE id_buku = ?";
                 PreparedStatement psStok = conn.prepareStatement(updateStok);
                 psStok.setInt(1, jumlah);
                 psStok.setString(2, idBuku);
                 psStok.executeUpdate();
 
-                // 🔥 Update total_harga di tabel transaksi
+                
                 String updateTotal = "UPDATE transaksi SET total_harga = (SELECT SUM(subtotal) FROM detail_transaksi WHERE id_transaksi = ?) WHERE id_transaksi = ?";
                 PreparedStatement psTotal = conn.prepareStatement(updateTotal);
                 psTotal.setInt(1, idTransaksi);
