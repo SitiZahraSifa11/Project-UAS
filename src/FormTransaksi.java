@@ -14,16 +14,15 @@ public class FormTransaksi extends JFrame implements ActionListener {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        // Komponen Form
         tfIdPembeli = new JTextField(10);
         tfNama = new JTextField(20);
         tfAlamat = new JTextField(30);
         tfIdBuku = new JTextField(10);
         tfJumlah = new JTextField(5);
+
         btnSimpan = new JButton("Simpan");
         btnSimpan.addActionListener(this);
 
-        // Layout
         JPanel panel = new JPanel(new GridLayout(6, 2, 5, 5));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panel.add(new JLabel("ID Pembeli:")); panel.add(tfIdPembeli);
@@ -40,7 +39,6 @@ public class FormTransaksi extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btnSimpan) {
             try (Connection conn = DBConnection.getConnection()) {
-                // Ambil input
                 String idPembeli = tfIdPembeli.getText().trim();
                 String nama = tfNama.getText().trim();
                 String alamat = tfAlamat.getText().trim();
@@ -52,7 +50,7 @@ public class FormTransaksi extends JFrame implements ActionListener {
                     return;
                 }
 
-                // Cek stok dan harga buku
+                // Cek buku
                 String cekBuku = "SELECT stok, harga FROM buku WHERE id_buku = ?";
                 PreparedStatement psCek = conn.prepareStatement(cekBuku);
                 psCek.setString(1, idBuku);
@@ -73,7 +71,7 @@ public class FormTransaksi extends JFrame implements ActionListener {
 
                 int subtotal = jumlah * hargaSatuan;
 
-                // Simpan pembeli
+                // Simpan atau update pembeli
                 String sqlPembeli = "INSERT INTO pembeli (id_pembeli, nama, alamat) VALUES (?, ?, ?) " +
                                     "ON DUPLICATE KEY UPDATE nama = ?, alamat = ?";
                 PreparedStatement psPembeli = conn.prepareStatement(sqlPembeli);
@@ -114,6 +112,13 @@ public class FormTransaksi extends JFrame implements ActionListener {
                 psStok.setInt(1, jumlah);
                 psStok.setString(2, idBuku);
                 psStok.executeUpdate();
+
+                // 🔥 Update total_harga di tabel transaksi
+                String updateTotal = "UPDATE transaksi SET total_harga = (SELECT SUM(subtotal) FROM detail_transaksi WHERE id_transaksi = ?) WHERE id_transaksi = ?";
+                PreparedStatement psTotal = conn.prepareStatement(updateTotal);
+                psTotal.setInt(1, idTransaksi);
+                psTotal.setInt(2, idTransaksi);
+                psTotal.executeUpdate();
 
                 JOptionPane.showMessageDialog(this, "Transaksi berhasil disimpan.\nTotal Bayar: Rp " + subtotal);
                 dispose();
