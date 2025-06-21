@@ -13,7 +13,7 @@ public class DaftarTransaksi extends JFrame {
 
         textArea = new JTextArea();
         textArea.setEditable(false);
-        textArea.setFont(new Font("Monospaced", Font.PLAIN, 12)); // untuk sejajar
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 12)); 
         add(new JScrollPane(textArea), BorderLayout.CENTER);
 
         tampilkanTransaksi();
