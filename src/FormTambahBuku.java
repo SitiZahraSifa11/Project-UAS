@@ -23,7 +23,7 @@ public class FormTambahBuku extends JFrame implements ActionListener {
         tfIdBuku = new JTextField(10);
         tfJudul = new JTextField(20);
         tfPengarang = new JTextField(20);
-        tfKategori = new JTextField(5);  // sekarang pakai input ID Kategori
+        tfKategori = new JTextField(5); 
         tfStok = new JTextField(5);
         tfHarga = new JTextField(10);
 
@@ -90,7 +90,7 @@ public class FormTambahBuku extends JFrame implements ActionListener {
         }
     }
 
-    // Untuk testing mandiri
+    
     public static void main(String[] args) {
         SwingUtilities.invokeLater(FormTambahBuku::new);
     }
