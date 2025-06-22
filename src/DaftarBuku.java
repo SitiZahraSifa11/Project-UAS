@@ -35,11 +35,7 @@ public class DaftarBuku extends JFrame implements ActionListener {
         btnHapus.addActionListener(this);
         btnRefresh.addActionListener(this);
 
-        tampilkanData();
-        setVisible(true);
-    }
-
-    private void tampilkanData() {
+        
         model.setRowCount(0); 
         try (Connection conn = DBConnection.getConnection()) {
             String sql = "SELECT b.id_buku, b.judul, b.pengarang, k.nama_kategori, b.stok, b.harga " +
@@ -58,6 +54,8 @@ public class DaftarBuku extends JFrame implements ActionListener {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Gagal mengambil data: " + e.getMessage());
         }
+
+        setVisible(true);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -77,7 +75,6 @@ public class DaftarBuku extends JFrame implements ActionListener {
                     ps.setString(1, idBuku);
                     ps.executeUpdate();
                     JOptionPane.showMessageDialog(this, "Data berhasil dihapus.");
-                    tampilkanData();
                 } catch (SQLException ex) {
                     JOptionPane.showMessageDialog(this, "Gagal menghapus data: " + ex.getMessage());
                 }
@@ -111,7 +108,6 @@ public class DaftarBuku extends JFrame implements ActionListener {
                     ps.executeUpdate();
 
                     JOptionPane.showMessageDialog(this, "Data berhasil diperbarui.");
-                    tampilkanData();
                 }
 
             } catch (NumberFormatException ex) {
@@ -121,7 +117,25 @@ public class DaftarBuku extends JFrame implements ActionListener {
             }
 
         } else if (e.getSource() == btnRefresh) {
-            tampilkanData();
+           
+            model.setRowCount(0); 
+            try (Connection conn = DBConnection.getConnection()) {
+                String sql = "SELECT b.id_buku, b.judul, b.pengarang, k.nama_kategori, b.stok, b.harga " +
+                             "FROM buku b LEFT JOIN kategori k ON b.id_kategori = k.id_kategori";
+                ResultSet rs = conn.createStatement().executeQuery(sql);
+                while (rs.next()) {
+                    model.addRow(new Object[]{
+                        rs.getString("id_buku"),
+                        rs.getString("judul"),
+                        rs.getString("pengarang"),
+                        rs.getString("nama_kategori"), 
+                        rs.getInt("stok"),
+                        rs.getInt("harga")
+                    });
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Gagal mengambil data: " + ex.getMessage());
+            }
         }
     }
 }
