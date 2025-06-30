@@ -3,36 +3,85 @@ import java.awt.event.*;
 import java.sql.*;
 import java.time.LocalDate;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class FormTransaksi extends JFrame implements ActionListener {
     JTextField tfIdPembeli, tfNama, tfAlamat, tfIdBuku, tfJumlah;
     JButton btnSimpan;
+    JTable table;
+    DefaultTableModel tableModel;
 
     public FormTransaksi() {
         setTitle("Form Transaksi");
-        setSize(400, 350);
+        setSize(600, 550);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
 
-        tfIdPembeli = new JTextField(10);
+        
+        JPanel panelInput = new JPanel(new GridBagLayout());
+        panelInput.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        panelInput.setBackground(Color.WHITE);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        Font fontLabel = new Font("Segoe UI", Font.PLAIN, 14);
+
+        JLabel lblIdPembeli = new JLabel("ID Pembeli:");
+        JLabel lblNama = new JLabel("Nama:");
+        JLabel lblAlamat = new JLabel("Alamat:");
+        JLabel lblIdBuku = new JLabel("ID Buku:");
+        JLabel lblJumlah = new JLabel("Jumlah:");
+
+        lblIdPembeli.setFont(fontLabel);
+        lblNama.setFont(fontLabel);
+        lblAlamat.setFont(fontLabel);
+        lblIdBuku.setFont(fontLabel);
+        lblJumlah.setFont(fontLabel);
+
+        tfIdPembeli = new JTextField(20);
         tfNama = new JTextField(20);
-        tfAlamat = new JTextField(30);
-        tfIdBuku = new JTextField(10);
-        tfJumlah = new JTextField(5);
+        tfAlamat = new JTextField(20);
+        tfIdBuku = new JTextField(20);
+        tfJumlah = new JTextField(20);
+
+        gbc.gridx = 0; gbc.gridy = 0; panelInput.add(lblIdPembeli, gbc);
+        gbc.gridx = 1; panelInput.add(tfIdPembeli, gbc);
+        gbc.gridx = 0; gbc.gridy = 1; panelInput.add(lblNama, gbc);
+        gbc.gridx = 1; panelInput.add(tfNama, gbc);
+        gbc.gridx = 0; gbc.gridy = 2; panelInput.add(lblAlamat, gbc);
+        gbc.gridx = 1; panelInput.add(tfAlamat, gbc);
+        gbc.gridx = 0; gbc.gridy = 3; panelInput.add(lblIdBuku, gbc);
+        gbc.gridx = 1; panelInput.add(tfIdBuku, gbc);
+        gbc.gridx = 0; gbc.gridy = 4; panelInput.add(lblJumlah, gbc);
+        gbc.gridx = 1; panelInput.add(tfJumlah, gbc);
 
         btnSimpan = new JButton("Simpan");
+        btnSimpan.setBackground(new Color(0, 120, 215));
+        btnSimpan.setForeground(Color.WHITE);
+        btnSimpan.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnSimpan.setFocusPainted(false);
+        btnSimpan.setPreferredSize(new Dimension(120, 35));
         btnSimpan.addActionListener(this);
 
-        JPanel panel = new JPanel(new GridLayout(6, 2, 5, 5));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        panel.add(new JLabel("ID Pembeli:")); panel.add(tfIdPembeli);
-        panel.add(new JLabel("Nama:")); panel.add(tfNama);
-        panel.add(new JLabel("Alamat:")); panel.add(tfAlamat);
-        panel.add(new JLabel("ID Buku:")); panel.add(tfIdBuku);
-        panel.add(new JLabel("Jumlah:")); panel.add(tfJumlah);
-        panel.add(new JLabel("")); panel.add(btnSimpan);
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        panelInput.add(btnSimpan, gbc);
 
-        add(panel);
+        add(panelInput, BorderLayout.NORTH);
+
+       
+        String[] kolom = {"ID Pembeli", "Nama", "Alamat", "ID Buku", "Jumlah", "Subtotal"};
+        tableModel = new DefaultTableModel(kolom, 0);
+        table = new JTable(tableModel);
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Data Transaksi"));
+
+        add(scrollPane, BorderLayout.CENTER);
+
         setVisible(true);
     }
 
@@ -73,7 +122,7 @@ public class FormTransaksi extends JFrame implements ActionListener {
 
                 
                 String sqlPembeli = "INSERT INTO pembeli (id_pembeli, nama, alamat) VALUES (?, ?, ?) " +
-                                    "ON DUPLICATE KEY UPDATE nama = ?, alamat = ?";
+                        "ON DUPLICATE KEY UPDATE nama = ?, alamat = ?";
                 PreparedStatement psPembeli = conn.prepareStatement(sqlPembeli);
                 psPembeli.setString(1, idPembeli);
                 psPembeli.setString(2, nama);
@@ -97,7 +146,7 @@ public class FormTransaksi extends JFrame implements ActionListener {
 
                 
                 String sqlDetail = "INSERT INTO detail_transaksi (id_transaksi, id_buku, jumlah, harga_satuan, subtotal) " +
-                                   "VALUES (?, ?, ?, ?, ?)";
+                        "VALUES (?, ?, ?, ?, ?)";
                 PreparedStatement psDetail = conn.prepareStatement(sqlDetail);
                 psDetail.setInt(1, idTransaksi);
                 psDetail.setString(2, idBuku);
@@ -120,8 +169,25 @@ public class FormTransaksi extends JFrame implements ActionListener {
                 psTotal.setInt(2, idTransaksi);
                 psTotal.executeUpdate();
 
-                JOptionPane.showMessageDialog(this, "Transaksi berhasil disimpan.\nTotal Bayar: Rp " + subtotal);
-                dispose();
+               
+                tableModel.addRow(new Object[]{idPembeli, nama, alamat, idBuku, jumlah, subtotal});
+
+                
+                String cekStokBaru = "SELECT stok FROM buku WHERE id_buku = ?";
+                PreparedStatement psCekStok = conn.prepareStatement(cekStokBaru);
+                psCekStok.setString(1, idBuku);
+                ResultSet rsStokBaru = psCekStok.executeQuery();
+                if (rsStokBaru.next()) {
+                    int stokBaru = rsStokBaru.getInt("stok");
+                    JOptionPane.showMessageDialog(this, "Transaksi berhasil!\nSisa Stok: " + stokBaru + "\nTotal Bayar: Rp " + subtotal);
+                }
+
+               
+                tfIdPembeli.setText("");
+                tfNama.setText("");
+                tfAlamat.setText("");
+                tfIdBuku.setText("");
+                tfJumlah.setText("");
 
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Jumlah harus berupa angka.");
