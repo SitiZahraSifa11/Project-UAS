@@ -17,7 +17,7 @@ public class FormTambahBuku extends JFrame implements ActionListener {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        // Panel Input Buku
+        
         JPanel panelInput = new JPanel(new GridBagLayout());
         panelInput.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         panelInput.setBackground(Color.WHITE);
@@ -75,7 +75,6 @@ public class FormTambahBuku extends JFrame implements ActionListener {
         gbc.anchor = GridBagConstraints.CENTER;
         panelInput.add(btnSimpan, gbc);
 
-        // Tabel Buku
         String[] kolom = {"ID Buku", "Judul", "Pengarang", "Stok", "Harga", "ID Kategori"};
         tableModel = new DefaultTableModel(kolom, 0);
         table = new JTable(tableModel);
@@ -84,7 +83,7 @@ public class FormTambahBuku extends JFrame implements ActionListener {
         add(panelInput, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Load data saat pertama kali
+        
         try {
             Connection conn = DBConnection.getConnection();
             Statement stmt = conn.createStatement();
@@ -145,7 +144,7 @@ public class FormTambahBuku extends JFrame implements ActionListener {
 
                 JOptionPane.showMessageDialog(this, "Buku berhasil ditambahkan.");
 
-                // Kosongkan form
+                
                 tfIdBuku.setText("");
                 tfJudul.setText("");
                 tfPengarang.setText("");
@@ -153,7 +152,7 @@ public class FormTambahBuku extends JFrame implements ActionListener {
                 tfStok.setText("");
                 tfHarga.setText("");
 
-                // Tambahkan ke tabel langsung
+                
                 Object[] barisBaru = {idBuku, judul, pengarang, stok, harga, idKategori};
                 tableModel.addRow(barisBaru);
 
