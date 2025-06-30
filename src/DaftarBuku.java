@@ -35,7 +35,7 @@ public class DaftarBuku extends JFrame implements ActionListener {
         btnHapus.addActionListener(this);
         btnRefresh.addActionListener(this);
 
-        
+        // Load data dari database ke tabel
         model.setRowCount(0); 
         try (Connection conn = DBConnection.getConnection()) {
             String sql = "SELECT b.id_buku, b.judul, b.pengarang, k.nama_kategori, b.stok, b.harga " +
@@ -75,6 +75,22 @@ public class DaftarBuku extends JFrame implements ActionListener {
                     ps.setString(1, idBuku);
                     ps.executeUpdate();
                     JOptionPane.showMessageDialog(this, "Data berhasil dihapus.");
+
+                    // Refresh data
+                    model.setRowCount(0); 
+                    String sql = "SELECT b.id_buku, b.judul, b.pengarang, k.nama_kategori, b.stok, b.harga " +
+                                 "FROM buku b LEFT JOIN kategori k ON b.id_kategori = k.id_kategori";
+                    ResultSet rs = conn.createStatement().executeQuery(sql);
+                    while (rs.next()) {
+                        model.addRow(new Object[]{
+                            rs.getString("id_buku"),
+                            rs.getString("judul"),
+                            rs.getString("pengarang"),
+                            rs.getString("nama_kategori"), 
+                            rs.getInt("stok"),
+                            rs.getInt("harga")
+                        });
+                    }
                 } catch (SQLException ex) {
                     JOptionPane.showMessageDialog(this, "Gagal menghapus data: " + ex.getMessage());
                 }
@@ -108,6 +124,22 @@ public class DaftarBuku extends JFrame implements ActionListener {
                     ps.executeUpdate();
 
                     JOptionPane.showMessageDialog(this, "Data berhasil diperbarui.");
+
+                    // Refresh data
+                    model.setRowCount(0); 
+                    String refreshSQL = "SELECT b.id_buku, b.judul, b.pengarang, k.nama_kategori, b.stok, b.harga " +
+                                        "FROM buku b LEFT JOIN kategori k ON b.id_kategori = k.id_kategori";
+                    ResultSet rs = conn.createStatement().executeQuery(refreshSQL);
+                    while (rs.next()) {
+                        model.addRow(new Object[]{
+                            rs.getString("id_buku"),
+                            rs.getString("judul"),
+                            rs.getString("pengarang"),
+                            rs.getString("nama_kategori"), 
+                            rs.getInt("stok"),
+                            rs.getInt("harga")
+                        });
+                    }
                 }
 
             } catch (NumberFormatException ex) {
@@ -117,7 +149,6 @@ public class DaftarBuku extends JFrame implements ActionListener {
             }
 
         } else if (e.getSource() == btnRefresh) {
-           
             model.setRowCount(0); 
             try (Connection conn = DBConnection.getConnection()) {
                 String sql = "SELECT b.id_buku, b.judul, b.pengarang, k.nama_kategori, b.stok, b.harga " +
